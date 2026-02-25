@@ -8,11 +8,10 @@ Designing QPO targeters in the CR3BP using KKG, GMOS, and continuing normal form
 - [ ] put tasks here
 
 ### GMOS: Andres, Adi
-- [ ] put tasks here
+- [ ] Dynamics, Propagation, STM, DFT curve rotation, Jacobian
+- [ ] Constraints, Solver, Continuation
 
 ### Normal form: Kaushik
 - [ ] Make Matlab wrapper
 - [ ] Get plots of orbits in normal form
 - [ ] Figure out how to continue into CR3BP
-
-
