@@ -7,7 +7,7 @@ Designing QPO targeters in the CR3BP using KKG, GMOS, and continuing normal form
 ### KKG: Nick, Kaushik
 - [ ] put tasks here
 
-### GMOS: Andres, Adi
+### GMOS: Andres 
 - [ ] Dynamics, Propagation, STM, DFT curve rotation, Jacobian
 - [ ] Constraints, Solver, Continuation
 
