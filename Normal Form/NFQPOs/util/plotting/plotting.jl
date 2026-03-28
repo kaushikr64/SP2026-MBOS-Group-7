@@ -8,11 +8,11 @@ struct orbit_struct
 end
 function figure_settings(font_size::Symbol = :large)
     axis_fontsize, legend_fontsize, text_fontsize, title_fontsize = if font_size == :large
-        25, 25, 18, 25
+        28, 28, 20, 28
     elseif font_size == :medium
-        20, 20, 20, 20
+        24, 24, 20, 24
     else
-        15, 15, 15, 15
+        20, 20, 18, 20
     end
 
     # Custom color order (matches MATLAB corder)
@@ -61,6 +61,10 @@ function figure_settings(font_size::Symbol = :large)
             yticklabelsize = axis_fontsize,
             xlabelsize = axis_fontsize,
             ylabelsize = axis_fontsize,
+            xlabelpadding = 20,
+            ylabelpadding = 20,
+            xticks = WilkinsonTicks(5),
+            yticks = WilkinsonTicks(3),
             titlesize = title_fontsize,
             titlefont = :regular,
         ),
@@ -78,6 +82,12 @@ function figure_settings(font_size::Symbol = :large)
             xlabelsize = axis_fontsize,
             ylabelsize = axis_fontsize,
             zlabelsize = axis_fontsize,
+            xlabeloffset = 80,
+            ylabeloffset = 100,
+            zlabeloffset = 120,
+            xticks = WilkinsonTicks(4),
+            yticks = WilkinsonTicks(4),
+            zticks = WilkinsonTicks(4),
             titlesize = title_fontsize,
             titlefont = :regular,
             xspinecolor_1 = :black,
@@ -349,7 +359,7 @@ function plot_orbit_actionangle_2d(orb::orbit_struct,
     function side_ax(row, title_str)
         Axis(fig[row, 2];
             title=title_str,
-            xlabel=L"t\ \mathrm{[n.d.]}",
+            xlabel=L"t\ \mathrm{[N.D]}",
         )
     end
 
@@ -451,7 +461,7 @@ function plot_orbit_actionangle(orb::orbit_struct,
     function side_ax(row, title_str)
         Axis(fig[row, 2];
             title=title_str,
-            xlabel=L"t\ \mathrm{[n.d.]}",
+            xlabel=L"t\ \mathrm{[N.D]}",
         )
     end
 
