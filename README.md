@@ -14,3 +14,7 @@ Designing QPO targeters in the CR3BP using KKG, GMOS, and continuing normal form
 ### Normal form: Kaushik
 - [ ] Get plots of orbits in normal form
 - [ ] Figure out how to continue into CR3BP
+
+
+>[!note]
+>When using the julia implementation, some packages used might need to be individually added. If encountering package not found errors, simply use `] add <package_name>` to resolve it
