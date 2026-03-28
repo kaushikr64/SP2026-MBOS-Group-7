@@ -1,0 +1,53 @@
+function [X_return, DP_return, STM_return, sol] = CR3BP_Prop2Poincare(X0, mu, section, tspan, opts)
+
+if ~exist('opts','var');          opts = struct();            end
+if ~isfield(opts, 'RelTol');      opts.RelTol = 1e-12;        end
+if ~isfield(opts, 'AbsTol');      opts.AbsTol = 1e-12;        end
+if ~isfield(opts, 'direction');   opts.direction = 1;         end
+
+% Unpack intiail terms
+X0    = X0(:);
+X_sec = section.X_sec(:);
+n_sec = section.n_sec(:);
+
+nx = 6;
+
+% STM augmented initial state
+X_aug0 = [X0; reshape(eye(nx), [nx^2, 1])];
+
+% Create Poincare map event and integration options
+event_fun = @(t, Xaug) poincare_event(t, Xaug, X_sec, n_sec,opts.direction);
+
+ode_opts = odeset('RelTol', opts.RelTol,'AbsTol', opts.AbsTol, 'Events', event_fun);
+
+% Integrate to the event
+sol = ode113(@(t,X) CR3BP_STM_EOM(X,mu,zeros(3,1)),tspan,X_aug0,ode_opts);
+
+
+% Grab state and STM at Poincare section
+X_aug_event = sol.ye(:,1);
+
+X_return = X_aug_event(1:nx);
+STM_return = reshape(X_aug_event(nx+1:nx+nx^2), [nx, nx]);
+
+f_return = CR3BP_EOM(X_return,mu,zeros(3,1));
+
+DP_return = STM_return - f_return*(n_sec'*STM_return)/(n_sec'*f_return);
+
+end
+
+% Event function
+function [value, isterminal, direction] = poincare_event(t, Xaug, X_sec, n_sec, direction_in)
+
+X = Xaug(1:6);
+
+if t > 0.01
+    value = PoincareSec(X, X_sec, n_sec);
+else
+    value = direction_in;
+end
+
+isterminal = 1;
+direction  = direction_in;
+
+end
