@@ -6,12 +6,8 @@ using CR3BPTools,
     Roots,
     JLD2,
     MathOptInterface,
-    Snopt,
-    SNOW,
     GLMakie,
-    ForwardDiff,
     LaTeXStrings,
-    MATLAB,
     NonlinearSolve,
     ProgressMeter
 
@@ -20,8 +16,8 @@ include("../util/plotting/plotting.jl")
 ## ── [1/xx] Load data ──────────────────────────────────────────────────────────
 println("[1] Loading data...")
 
-L1_data_path = "../data/Earth-Moon/Resonant/L1/Order16.jld2"
-L2_data_path = "../data/Earth-Moon/Resonant/L2/Order16.jld2"
+L1_data_path = "data/Earth-Moon/Resonant/L1/Order16.jld2"
+L2_data_path = "data/Earth-Moon/Resonant/L2/Order16.jld2"
 
 transformations = load(L1_data_path, "transformations")
 hamiltonians = load(L1_data_path, "hamiltonians")
