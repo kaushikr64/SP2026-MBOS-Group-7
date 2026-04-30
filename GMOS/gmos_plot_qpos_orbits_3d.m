@@ -6,6 +6,23 @@ function gmos_plot_qpos_orbits_3d(traj, style, t_i)
 %   gmos_plot_qpos_orbits_3d(traj, style)
 %   gmos_plot_qpos_orbits_3d(traj, t_i)
 %   gmos_plot_qpos_orbits_3d(traj, style, t_i)
+%
+% Optional style fields:
+%   style.mode            = 'index' | 'gray' | 'rgb'
+%   style.lineWidth       = scalar
+%   style.alpha           = scalar in [0,1]
+%   style.gray            = scalar gray level
+%   style.rgb             = 1x3 RGB color
+%   style.newFigure       = true/false
+%   style.ax              = axes handle
+%
+% Optional ring styling fields (used only if t_i is provided):
+%   style.showRingLine    = true/false
+%   style.showRingScatter = true/false
+%   style.ringLineWidth   = scalar
+%   style.ringLineColor   = 1x3 RGB color
+%   style.ringMarkerSize  = scalar
+%   style.ringMarkerAlpha = scalar in [0,1]
 
     % -------------------------
     % Flexible input parsing
@@ -41,6 +58,29 @@ function gmos_plot_qpos_orbits_3d(traj, style, t_i)
     if ~isfield(style, 'alpha') || isempty(style.alpha)
         style.alpha = 0.25;
     end
+    if ~isfield(style, 'newFigure') || isempty(style.newFigure)
+        style.newFigure = true;
+    end
+    if ~isfield(style, 'ax')
+        style.ax = [];
+    end
+
+    % Ring defaults
+    if ~isfield(style, 'showRingLine') || isempty(style.showRingLine)
+        style.showRingLine = false;
+    end
+    if ~isfield(style, 'showRingScatter') || isempty(style.showRingScatter)
+        style.showRingScatter = true;
+    end
+    if ~isfield(style, 'ringLineWidth') || isempty(style.ringLineWidth)
+        style.ringLineWidth = 1.5;
+    end
+    if ~isfield(style, 'ringMarkerSize') || isempty(style.ringMarkerSize)
+        style.ringMarkerSize = 36;
+    end
+    if ~isfield(style, 'ringMarkerAlpha') || isempty(style.ringMarkerAlpha)
+        style.ringMarkerAlpha = 1.0;
+    end
 
     mode = lower(string(style.mode));
     [~, ~, M] = size(traj.Y);
@@ -61,16 +101,37 @@ function gmos_plot_qpos_orbits_3d(traj, style, t_i)
         error("style.mode must be 'index', 'gray', or 'rgb'.");
     end
 
-    figure;
-    hold on; grid on; axis equal;
-    view(3);
-    xlabel('x [n.d]'); ylabel('y [n.d.]'); zlabel('z [n.d.]');
-    %title('GMOS: propagated QPO trajectories');
+    % -------------------------
+    % Axes / figure handling
+    % -------------------------
+    if ~isempty(style.ax)
+        ax = style.ax;
+        if ~ishandle(ax) || ~strcmp(get(ax, 'Type'), 'axes')
+            error('style.ax must be a valid axes handle.');
+        end
+        axes(ax);
+    elseif style.newFigure
+        figure;
+        ax = gca;
+    else
+        ax = gca;
+    end
 
+    hold(ax, 'on');
+    grid(ax, 'on');
+    axis(ax, 'equal');
+    view(ax, 3);
+    xlabel(ax, '$x$ [n.d.]');
+    ylabel(ax, '$y$ [n.d.]');
+    zlabel(ax, '$z$ [n.d.]');
+
+    % -------------------------
+    % Draw trajectories
+    % -------------------------
     for m = 1:M
         r = squeeze(traj.Y(1:3,:,m));
 
-        patch( ...
+        patch(ax, ...
             'XData', [r(1,:) nan], ...
             'YData', [r(2,:) nan], ...
             'ZData', [r(3,:) nan], ...
@@ -80,7 +141,9 @@ function gmos_plot_qpos_orbits_3d(traj, style, t_i)
             'LineWidth', style.lineWidth);
     end
 
+    % -------------------------
     % Optional ring at fixed time t_i
+    % -------------------------
     if ~isempty(t_i)
         if ~isscalar(t_i) || ~isnumeric(t_i) || ~isfinite(t_i)
             error('t_i must be a finite numeric scalar.');
@@ -100,7 +163,32 @@ function gmos_plot_qpos_orbits_3d(traj, style, t_i)
         y_ring = squeeze(traj.Y(2,k_i,:));
         z_ring = squeeze(traj.Y(3,k_i,:));
 
-        plot3(x_ring, y_ring, z_ring, '-', ...
-                'LineWidth', 1.5);
+        % Ring line
+        if style.showRingLine
+            if isfield(style, 'ringLineColor') && ~isempty(style.ringLineColor)
+                ringLineColor = style.ringLineColor;
+            else
+                % If all orbit colors are the same, use that color.
+                % Otherwise use the mean color as a neutral representative line.
+                ringLineColor = mean(cols, 1);
+            end
+
+            plot3(ax, x_ring, y_ring, z_ring, '-', ...
+                'LineWidth', style.ringLineWidth, ...
+                'Color', ringLineColor);
+        end
+
+        % Ring scatter points, each matching its orbit color
+        if style.showRingScatter
+            hsc = scatter3(ax, x_ring, y_ring, z_ring, ...
+                style.ringMarkerSize, cols, 'filled');
+
+            if isprop(hsc, 'MarkerFaceAlpha')
+                hsc.MarkerFaceAlpha = style.ringMarkerAlpha;
+            end
+            if isprop(hsc, 'MarkerEdgeAlpha')
+                hsc.MarkerEdgeAlpha = style.ringMarkerAlpha;
+            end
+        end
     end
 end

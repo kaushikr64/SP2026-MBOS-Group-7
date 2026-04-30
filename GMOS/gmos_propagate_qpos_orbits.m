@@ -36,7 +36,7 @@ function traj = gmos_propagate_qpos_orbits(z, N, mu, jList, nPeriods, nSavePerPe
         j = jList(m);
         x0 = X0(:, j);
 
-        % Use ode113 for robust long integrations
+        % Or use ode113 if robust long integrations are needed
         sol = ode89(@(t,y) CR3BP_mu(t, y, mu), [0, tEnd], x0, ode_opts);
 
         % Sample onto uniform grid for easy plotting/comparison

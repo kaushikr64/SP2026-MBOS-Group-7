@@ -164,7 +164,7 @@ fprintf('  ||dx1-dx1lin|| = %.3e\n', norm(dx1 - dx1_lin));
     % -----------------------
     if doPlot
         figure;
-        plot(1:N, init.X0(iMax,:), 'o-'); hold on;
+        plot(1:N, init.X0(iMax,:), 'o-'); hold on;  
         plot(1:N, X1shift(iMax,:), '.-');
         grid on;
         xlabel('index j');
@@ -173,7 +173,7 @@ fprintf('  ||dx1-dx1lin|| = %.3e\n', norm(dx1 - dx1_lin));
         title('GMOS invariance demo (max-amplitude component)');
 
         figure;
-        plot(1:N, init.X0(1,:), 'o-'); hold on;
+        plot(1:N, init.X0(1,:), 'o-'); hold on;  
         plot(1:N, X1shift(1,:), '.-');
         grid on;
         xlabel('index j');
