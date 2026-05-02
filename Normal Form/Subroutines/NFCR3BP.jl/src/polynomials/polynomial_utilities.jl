@@ -86,19 +86,24 @@ end
 
 function Base.show(io::IO, polynomial::BirkhoffActionAnglePolynomial)
     println(
-        "Birkhoff Normal form of degree ",
-        polynomial.maxorder,
-        " containing ",
-        length(polynomial.coefficients),
-        " terms.",
+        "Birkhoff action-angle polynomial of degree ",
+        length(polynomial.degrees) - 1,
     )
-    for i = 1:lastindex(polynomial.coefficients)
-        println(
-            "Coefficient = ",
-            polynomial.coefficients[i],
-            ", Exponent = ",
-            polynomial.exponents[i],
-        )
+    for degree in polynomial.degrees
+        if nnz(degree.terms) != 0
+            println("Order ", degree.order, ": ", nnz(degree.terms), " terms")
+            degree_nzterms = findnz(degree.terms)
+            degree_indices = degree_nzterms[1]
+            degree_coeffs = degree_nzterms[2]
+            for i = 1:lastindex(degree_indices)
+                println(
+                    "  Coefficient = ",
+                    degree_coeffs[i],
+                    ", Exponent = ",
+                    get_multiindex3(degree.order, degree_indices[i]),
+                )
+            end
+        end
     end
 end
 

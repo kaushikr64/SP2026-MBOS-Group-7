@@ -17,6 +17,14 @@ function resonant_term(k::AbstractVector{<:Integer})
     return false
 end
 
+function rcm_term(k::AbstractVector{<:Integer})
+    #Resonant
+    if (k[1] != k[2])
+        return true
+    end
+    return false
+end
+
 
 function obtain_generating_function(
     H::MixedDegreePolynomial,
@@ -62,7 +70,7 @@ function lie_series_transformation!(H::MixedDegreePolynomial, sys::NamedTuple)
             for ii = 1:substepnum
                 poiss_brac = poisson_bracket(poiss_brac, generating_function) # Do the poisson brackets
                 H.degrees[degreeindex+(ii-1)*order_increment] +=
-                    ((1/factorial(big(ii)))*poiss_brac)
+                    ((1/factorial(ii))*poiss_brac)
                 # Display counter
                 # println("Step ", stepstaken+1, ".",ii)
             end

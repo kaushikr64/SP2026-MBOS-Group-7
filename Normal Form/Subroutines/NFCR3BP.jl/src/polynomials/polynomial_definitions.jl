@@ -21,12 +21,14 @@ struct ComplexHomogenousPolynomial{T1<:Integer,T2<:SparseVector{<:Complex}} <:
     terms::T2
 end
 
-struct BirkhoffActionAnglePolynomial{T1<:Integer,T2<:Vector{Real},T3<:Vector{<:SVector}} <:
-       AbstractActionAnglePolynomial
-    maxorder::T1
-    coefficients::T2
-    exponents::T3
+struct BirkhoffActionAnglePolynomialDegree{
+    T1<:Integer,
+    T2<:SparseVector{<:Real}
+}
+    order::T1
+    terms::T2
 end
+
 
 struct ResonantActionAnglePolynomialDegree{
     T1<:Integer,
@@ -39,8 +41,6 @@ struct ResonantActionAnglePolynomialDegree{
 end
 
 
-
-
 """
     Polynomial
 """
@@ -50,6 +50,12 @@ end
 
 struct ResonantActionAnglePolynomial{
     T1<:AbstractVector{<:ResonantActionAnglePolynomialDegree},
+} <: AbstractActionAnglePolynomial
+    degrees::T1
+end
+
+struct BirkhoffActionAnglePolynomial{
+    T1<:AbstractVector{<:BirkhoffActionAnglePolynomialDegree},
 } <: AbstractActionAnglePolynomial
     degrees::T1
 end
@@ -120,3 +126,4 @@ function CombinePolynomials(constituents::Vector{<:AbstractHomogenousPolynomial}
     end
     return MixedDegreePolynomial(polynomial_vector)
 end
+

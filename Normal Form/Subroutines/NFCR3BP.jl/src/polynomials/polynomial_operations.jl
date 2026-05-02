@@ -370,6 +370,43 @@ function differentiate(a::MixedDegreePolynomial, b::Integer)
     return CombinePolynomials(output_degrees)
 end
 
+function differentiate(a::BirkhoffActionAnglePolynomialDegree, b::Integer)
+    if a.order == 0
+        return ZeroHomogenousPolynomial(0)
+    end
+
+    output_order = a.order-1
+
+    output_terms = spzeros(get_num_monomials(3, output_order))
+
+    a_indices = rowvals(a.terms)
+    a_coeffs = nonzeros(a.terms)
+
+
+    for i in eachindex(a_indices)
+        exponent = get_multiindex3(a.order, a_indices[i])
+        if exponent[b]!=0
+            output_coeff = a_coeffs[i]*exponent[b]
+            output_exponent = Vector(exponent)
+            output_exponent[b] -= 1
+            output_listindex = get_listindex3(output_order, output_exponent)
+            output_terms[output_listindex] = output_coeff
+        end
+    end
+    return BirkhoffActionAnglePolynomialDegree(output_order, droptol!(output_terms, POLYTOL))
+end
+
+function differentiate(a::BirkhoffActionAnglePolynomial, b::Integer)
+    output_degrees = BirkhoffActionAnglePolynomialDegree[]
+    for degree in a.degrees
+        if nnz(degree.terms) != 0
+            push!(output_degrees, differentiate(degree, b))
+        end
+    end
+    return BirkhoffActionAnglePolynomial(output_degrees)
+end
+
+
 function differentiate(a::ResonantActionAnglePolynomialDegree, b::Integer)
     a_integrable_indices = rowvals(a.integrable_terms)
     a_resonant_indices = rowvals(a.resonant_terms)
@@ -534,6 +571,35 @@ function evaluatepolynomial(a::MixedDegreePolynomial, subs_vars::SVector{6})
 end
 
 function evaluatepolynomial(a::MixedDegreePolynomial, subs_vec::Vector{<:SVector})
+    out_vec = zeros(eltype(subs_vec[1]), length(subs_vec))
+    for degree in a.degrees
+        if nnz(degree.terms) != 0
+            degree_indices = rowvals(degree.terms)
+            degree_coeffs = nonzeros(degree.terms)
+            degree_order = degree.order
+            for i in eachindex(degree_indices)
+                degree_multiindex = get_multiindex6(degree_order, degree_indices[i])
+                out_vec += [
+                    degree_coeffs[i] * prod(subs_vars .^ degree_multiindex) for
+                    subs_vars in subs_vec
+                ]
+            end
+        end
+    end
+    return out_vec
+end
+
+function evaluatepolynomial(a::BirkhoffActionAnglePolynomial, subs_vars::SVector{6})
+    out_value = 0
+    for degree in a.degrees
+        if nnz(degree.terms) != 0
+            out_value += evaluatepolynomial(degree, subs_vars)
+        end
+    end
+    return out_value
+end
+
+function evaluatepolynomial(a::BirkhoffActionAnglePolynomial, subs_vec::Vector{<:SVector})
     out_vec = zeros(eltype(subs_vec[1]), length(subs_vec))
     for degree in a.degrees
         if nnz(degree.terms) != 0

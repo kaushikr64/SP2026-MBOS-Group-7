@@ -6,15 +6,15 @@ using NFCR3BP, JLD2
 
 # System parameters
 normalization_order = 16
-mu = 0.0121505406935702
+mu = 0.012150585609624
 system_name = "Earth-Moon"
 lagrange_point = 1
 
 # Enter Birkhoff for birkhoff (resonant yet unsupported), case sensitive
-normalization_type = "Birkhoff"
+normalization_type = "RCM"
 
 # Where the data is
-storage_folder = "../data/"
+storage_folder = "./data/"
 storage_file =
     storage_folder *
     system_name *

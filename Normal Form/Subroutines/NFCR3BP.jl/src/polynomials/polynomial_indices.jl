@@ -73,8 +73,7 @@ const MIDX3 = generate_multiindex_table(MAXDEGREE, 3)
 
 
 function get_multiindex6(order::Integer, listindex::Integer)
-    multiindex_table = MIDX6
-    return multiindex_table[order+1][listindex]
+    return MIDX6[order+1][listindex]::SVector{6,Int}
 end
 
 function get_listindex6(order::Integer, multiindex)
@@ -96,8 +95,7 @@ function get_listindex6(order::Integer, multiindex)
 end
 
 function get_multiindex3(order::Integer, listindex::Integer)
-    multiindex_table = MIDX3
-    return multiindex_table[order+1][listindex]
+    return MIDX3[order+1][listindex]::SVector{3,Int}
 end
 
 function get_listindex3(order::Integer, multiindex)

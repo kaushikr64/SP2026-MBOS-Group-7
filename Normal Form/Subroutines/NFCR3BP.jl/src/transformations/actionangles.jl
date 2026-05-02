@@ -3,29 +3,35 @@
 """
 
 function normalform2birkhoff(complex_normal_form::MixedDegreePolynomial)
-    num_terms = sum(nnz(degree.terms) for degree in complex_normal_form.degrees)
-    actionangle_coefficients = Vector{Real}(undef, num_terms)
-    actionangle_exponents = Vector{SVector}(undef, num_terms)
-    actionangle_index = 1 #To concatenate the vectors
-    for degree in complex_normal_form.degrees
-        normal_form_nonzeros = findnz(degree.terms)
-        normal_form_indices = normal_form_nonzeros[1]
-        normal_form_coeffs = normal_form_nonzeros[2]
-        for i in eachindex(normal_form_indices)
-            normal_form_exponent = get_multiindex6(degree.order, normal_form_indices[i])
-            (kq1, kq2, kq3) = normal_form_exponent[1:2:5]
-            actionangle_coefficients[actionangle_index] =
-                real(normal_form_coeffs[i]/(1im^kq2*1im^kq3))
-            actionangle_exponents[actionangle_index] = SVector(kq1, kq2, kq3)
-            actionangle_index += 1
+    maxorder_nf = get_maxorder(complex_normal_form)
+    maxorder_aa = Int(floor(maxorder_nf / 2))
+    birkhoff_degrees = Vector{BirkhoffActionAnglePolynomialDegree}(undef, maxorder_aa + 1)
+
+    birkhoff_degrees[1] = BirkhoffActionAnglePolynomialDegree(0, spzeros(Float64, 1))
+
+    for actionangle_degree = 1:maxorder_aa
+        normalform_degree = 2 * actionangle_degree
+        normalform_ofdegree = terms_ofdegree(complex_normal_form, normalform_degree)
+        normalform_indices = rowvals(normalform_ofdegree.terms)
+        normalform_coeffs = nonzeros(normalform_ofdegree.terms)
+
+        num_monomials = get_num_monomials(3, actionangle_degree)
+        terms = spzeros(Float64, num_monomials)
+
+        for i in eachindex(normalform_indices)
+            normalform_exponent = get_multiindex6(normalform_degree, normalform_indices[i])
+            (kq1, _, kq2, kp2, kq3, kp3) = normalform_exponent
+            actionangle_exponent = SVector(kq1, kq2, kq3)
+            actionangle_index = get_listindex3(actionangle_degree, actionangle_exponent)
+            terms[actionangle_index] = real(normalform_coeffs[i] / (1im^kp2 * 1im^kp3))
         end
+
+        birkhoff_degrees[actionangle_degree + 1] = BirkhoffActionAnglePolynomialDegree(
+            actionangle_degree, droptol!(terms, POLYTOL)
+        )
     end
-    actionangle_maxorder = Integer(sum(actionangle_exponents[end]))
-    return BirkhoffActionAnglePolynomial(
-        actionangle_maxorder,
-        actionangle_coefficients,
-        actionangle_exponents,
-    )
+
+    return BirkhoffActionAnglePolynomial(birkhoff_degrees)
 end
 
 function normalform2birkhoff(normalform_state::AbstractVector)

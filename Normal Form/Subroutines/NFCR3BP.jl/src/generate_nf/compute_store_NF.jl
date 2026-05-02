@@ -39,6 +39,16 @@ function compute_normalform(
             real_normal = H_real_normal,
             action_angle = H_action_angle,
         )
+    elseif normalization_type == "RCM"
+        println("Normalizing Hamiltonian up to order ", normalization_order)
+        time_NF = @elapsed (H_complex_normal, H_real_normal, G_real) =
+            generate_RCM(mu, lagrangepoint, normalization_order)
+        println("RCM computed in ", time_NF, " seconds.")
+
+        hamiltonians = (
+            complex_normal = H_complex_normal,
+            real_normal = H_real_normal,
+        )
     end
 
     time_eoms = @elapsed normalform_flow = get_hamiltonian_flow(H_real_normal)
@@ -59,30 +69,70 @@ function compute_normalform(
     time_G_flow = @elapsed G_flow = get_hamiltonian_flow(G_real)
     println("Generating function flow computed in ", time_G_flow, " seconds.")
 
-    time_H_flow = @elapsed H_flow = get_hamiltonian_flow(H_action_angle)
-    println("Hamiltonian flow computed in ", time_H_flow, " seconds.")
+    if normalization_type != "RCM"
+        time_H_flow = @elapsed H_flow = get_hamiltonian_flow(H_action_angle)
+        println("Hamiltonian flow computed in ", time_H_flow, " seconds.")
+    end
 
 
     generating_function = G_real
-    derivatives = (
-        NF_flow = normalform_flow::Vector{MixedDegreePolynomial},
-        jac = normalform_jac::Matrix{MixedDegreePolynomial},
-        pureAA_flow = H_flow::Vector{ResonantActionAnglePolynomial},
-        AA_flow = Vector{Union{MixedDegreePolynomial,ResonantActionAnglePolynomial}}(
-            vcat(normalform_flow[1:2], H_flow[3:6]),
-        ),
-    )
-    transformations = (
-        recentering = recentering,
-        qqdot2qp = qqdot2qp,
-        rescaling = rescaling,
-        diagonalizing = diagonalizing,
-        forward = forward_transformation,
-        backward = backward_transformation,
-        G_flow = G_flow,
-        nf2aa = nf2aa,
-        aa2nf = aa2nf,
-    )
+    if normalization_type == "Birkhoff"
+        derivatives = (
+            NF_flow = normalform_flow::Vector{MixedDegreePolynomial},
+            jac = normalform_jac::Matrix{MixedDegreePolynomial},
+            pureAA_flow = H_flow::Vector{BirkhoffActionAnglePolynomial},
+            AA_flow = Vector{Union{MixedDegreePolynomial,BirkhoffActionAnglePolynomial}}(
+                vcat(normalform_flow[1:2], H_flow[3:6]),
+            ),
+        )
+        transformations = (
+            recentering = recentering,
+            qqdot2qp = qqdot2qp,
+            rescaling = rescaling,
+            diagonalizing = diagonalizing,
+            forward = forward_transformation,
+            backward = backward_transformation,
+            G_flow = G_flow,
+            nf2aa = nf2aa,
+            aa2nf = aa2nf,
+            )
+    elseif normalization_type == "Resonant"
+        derivatives = (
+            NF_flow = normalform_flow::Vector{MixedDegreePolynomial},
+            jac = normalform_jac::Matrix{MixedDegreePolynomial},
+            pureAA_flow = H_flow::Vector{ResonantActionAnglePolynomial},
+            AA_flow = Vector{Union{MixedDegreePolynomial,ResonantActionAnglePolynomial}}(
+                vcat(normalform_flow[1:2], H_flow[3:6]),
+            ),
+        )
+        transformations = (
+            recentering = recentering,
+            qqdot2qp = qqdot2qp,
+            rescaling = rescaling,
+            diagonalizing = diagonalizing,
+            forward = forward_transformation,
+            backward = backward_transformation,
+            G_flow = G_flow,
+            nf2aa = nf2aa,
+            aa2nf = aa2nf,
+            )
+
+    elseif normalization_type == "RCM"
+        derivatives = (
+            NF_flow = normalform_flow::Vector{MixedDegreePolynomial},
+            jac = normalform_jac::Matrix{MixedDegreePolynomial},
+        )
+        transformations = (
+            recentering = recentering,
+            qqdot2qp = qqdot2qp,
+            rescaling = rescaling,
+            diagonalizing = diagonalizing,
+            forward = forward_transformation,
+            backward = backward_transformation,
+            G_flow = G_flow
+        )
+
+    end
 
     return hamiltonians, generating_function, derivatives, transformations
 end

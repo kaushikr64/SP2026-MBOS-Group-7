@@ -25,6 +25,7 @@ function get_hamiltonian_flow(H::MixedDegreePolynomial)
     return dxdt
 end
 
+
 function get_hamiltonian_jacobian(Hvec::Vector{MixedDegreePolynomial})
     jacbn = Matrix{MixedDegreePolynomial}(undef, 6, 6)
     for i = 1:6
@@ -33,6 +34,26 @@ function get_hamiltonian_jacobian(Hvec::Vector{MixedDegreePolynomial})
         end
     end
     return jacbn
+end
+
+function get_hamiltonian_flow(H::BirkhoffActionAnglePolynomial)
+    zero_birkhoffAApolynomial = BirkhoffActionAnglePolynomial([
+        BirkhoffActionAnglePolynomialDegree(0, spzeros(Real, 1)),
+    ])
+
+    dHdI1 = differentiate(H, 1)
+    dHdI2 = differentiate(H, 2)
+    dHdI3 = differentiate(H, 3)
+
+    dÎ1dt = zero_birkhoffAApolynomial
+    dÎ2dt = zero_birkhoffAApolynomial
+    dÎ3dt = zero_birkhoffAApolynomial
+
+    dθ̂1dt = dHdI1
+    dθ̂2dt = dHdI2
+    dθ̂3dt = dHdI3
+
+    return [dÎ1dt, dθ̂1dt, dÎ2dt, dθ̂2dt, dÎ3dt, dθ̂3dt]
 end
 
 function get_hamiltonian_flow(H::ResonantActionAnglePolynomial)
